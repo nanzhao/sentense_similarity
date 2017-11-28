@@ -24,15 +24,16 @@ if __name__ == '__main__':
     # 训练模型
     ss = SentenceSimilarity(seg)
     ss.set_sentences(train_sentences)
-    ss.TfidfModel()         # tfidf模型
+    #ss.TfidfModel()         # tfidf模型
     #ss.LsiModel()         # lsi模型
     #ss.LdaModel()         # lda模型
+    ss.FasttxModel()
 
     # 测试集1
     right_count = 0
     for i in range(0,len(train_sentences)):
         print(test1_sentences[i])
-        ss.similarity(test1_sentences[i])
+        ss.similarity2(test1_sentences[i])
         print("\r\n")
 
 

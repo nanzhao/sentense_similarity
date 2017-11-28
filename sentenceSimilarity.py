@@ -2,10 +2,11 @@
 
 
 import gc
-
+import os
 from gensim import corpora, models, similarities
 from sentence import Sentence
 from collections import defaultdict
+from gensim.models.fasttext import FastText as FT_gensim
 
 class SentenceSimilarity():
 
@@ -75,6 +76,19 @@ class SentenceSimilarity():
         # 创建相似度矩阵
         self.index = similarities.MatrixSimilarity(self.corpus)
 
+    # FastText模型
+    def FasttxModel(self):
+        self.simple_model()
+        # 转换模型
+        if os.path.exists('saved_model_gensim'):
+            self.model =  FT_gensim.load('saved_model_gensim')
+        else:
+            self.model = FT_gensim(size=100)
+            self.model.build_vocab(self.sentences)
+            self.model.train(self.sentences, total_examples= self.model.corpus_count, epochs= self.model.iter)
+            self.model.save('saved_model_gensim')
+
+
     def sentence2vec(self,sentence):
         sentence = Sentence(sentence,self.seg)
         vec_bow = self.dictionary.doc2bow(sentence.get_cuted_sentence())
@@ -92,6 +106,21 @@ class SentenceSimilarity():
             score = sim[i][1]
             sentence = self.sentences[index]
             print(sentence.get_origin_sentence()+' '+str(score))
+
+    def similarity2(self,sentence):
+        sentence = Sentence(sentence, self.seg)
+        sentence_query = sentence.get_cuted_sentence()
+
+        sim_list = []
+        for i in range(0, self.sentences.__len__()):
+            distance = self.model.wmdistance(sentence_query, self.sentences[i].get_cuted_sentence())
+            sim_list.append((distance, i))
+
+        sim_sort = sorted(sim_list, key=lambda sim: sim[0])
+
+        for i in range(0, 5):
+            print("sim_max is %d", sim_sort[i][0])
+            print(self.sentences[sim_sort[i][1]].get_cuted_sentence())
 
 
 
